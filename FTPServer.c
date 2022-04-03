@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	hints.ai_protocol = IPPROTO_UDP; //Set UDP protocol
 
 	//We try to establish the connection.
-	if ((status = getaddrinfo(NULL, PORT, &hints, &res)) != 0) {
+	if ((status = getaddrinfo("NULL", PORT, &hints, &res)) != 0) {
 		fprintf(stderr, "No se pudo establecer el servidor. Motivo: %s\n", gai_strerror(status));
 		return 1;
 	}
