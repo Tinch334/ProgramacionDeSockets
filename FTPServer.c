@@ -21,29 +21,22 @@
 int main(int argc, char *argv[])
 {
 	socket_t comSocket;
-	their_info comThInfo;
+	their_info comTheirInfo;
 
 	//For testing only.
-	char buff[1000];
-	size_t buffLen = 1000;
+	char buff[MAX_BUFF_SIZE];
 	int numbytes;
 
 	//Create conection.
 	displayError(initSocket(&comSocket, NULL), 0);
 	displayError(bindSocket(&comSocket), 0);
 	displayError(listenSocket(&comSocket), 0);
-	displayError(acceptSocket(&comSocket, &comThInfo), 0);
+	displayError(acceptSocket(&comSocket, &comTheirInfo), 0);
 
 	destroySocket(&comSocket);
 
-	//For testing only.
-	if ((numbytes = recv(comThInfo.theirFd, buff, buffLen, 0)) == -1) {
-		perror("recv");
-		exit(1);
-	}
+	//Main server loop
+	numbytes = receiveSocket(comTheirInfo.theirFd, buff, MAX_BUFF_SIZE);
 
-	buff[numbytes] = '\0';
-	printf("Message %s", buff);
-
-
+	printf("Message %s--\n", buff);
 }

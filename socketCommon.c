@@ -96,3 +96,44 @@ void displayError(int errorCode, int type) {
 	if (errorCode != 0)
 		fprintf(stderr, "There was a problem with the %s. Reason: %s\n", ((type == 0) ? "server" : "client"), gai_strerror(errorCode));
 }
+
+
+int sendSocket(int fd, const char *buffer, size_t bufSize) {
+	int total = 0;
+	size_t sent;
+
+	//The while is used because it's possible that some messages may not be sent completely on the first call.
+	//The buffer is accessed using the total index to offset it in case that a part of the message has been sent.
+	while (total < bufSize) {
+		sent += send(fd, &buffer[total], bufSize - total, 0);
+
+		//If we've sent 0 bytes then we've sent all the message.
+		if (sent == 0)
+			return total;
+		else
+			total += sent;
+	}
+
+	return total;
+}
+
+
+int receiveSocket(int fd, char *buffer, size_t bufSize) {
+	int total = 0;
+	size_t received;
+
+	while (total < bufSize) {
+		received = recv(fd, &buffer[total], bufSize - total, 0);
+
+		if (received == 0) {
+			buffer[total] = '\0';
+			return total;
+		}
+		else if (received == (-1))
+			perror("recv");
+		else
+			total += received;
+	}
+
+	return total;
+}

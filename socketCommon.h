@@ -17,6 +17,7 @@
 
 
 #define FTP_PORT_COM "21"
+#define MAX_BUFF_SIZE 500
 
 
 typedef struct {
@@ -75,9 +76,21 @@ void destroyTheirSocket(their_info *sock);
 
 
 /*
-Displays an error code properly, with it's accompanying message.
+	Displays an error code properly, with it's accompanying message.
 */
 void displayError(int errorCode, int type);
+
+
+/*
+	Sends the given buffer to the given socket_t.
+*/
+int sendSocket(int fd, const char *buffer, size_t bufSize);
+
+
+/*
+	Receives the info from the given socket_t.
+*/
+int receiveSocket(int fd, char *buffer, size_t bufSize);
 
 
 #endif /* __SC_H__ */
