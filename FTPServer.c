@@ -36,7 +36,11 @@ int main(int argc, char *argv[])
 	destroySocket(&comSocket);
 
 	//Main server loop
+	//while (1) {
 	numbytes = receiveSocket(comTheirInfo.theirFd, buff, MAX_BUFF_SIZE);
 
-	printf("Message %s--\n", buff);
+	printf("Message %s\n", buff);
+	//}
+
+	return 0;
 }

@@ -63,13 +63,13 @@ int acceptSocket(socket_t *sock, their_info *thInfo) {
 	int tempFd = accept(sock->fd, (struct sockaddr *)&thInfo->theirAddr, &thInfo->theirSize);
 
 	//Check if the incoming connection is valid.
-	if (tempFd == 1) {
+	if (tempFd == (-1)) {
 		return tempFd;
 	}
 
 	thInfo->theirFd = tempFd;
 
-	//If it is return 0.
+	//Otherwise return 0.
 	return 0;
 }
 
@@ -129,8 +129,6 @@ int receiveSocket(int fd, char *buffer, size_t bufSize) {
 			buffer[total] = '\0';
 			return total;
 		}
-		else if (received == (-1))
-			perror("recv");
 		else
 			total += received;
 	}
