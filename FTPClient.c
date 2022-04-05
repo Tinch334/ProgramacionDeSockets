@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -19,14 +20,10 @@ int main(int argc, char *argv[])
 	int serverFd;
 	int numbytes;
 
-	displayError(initSocket(&comSocket, argv[1]), 0);
-	displayError((serverFd = connectSocket(&comSocket)), 0);
+	displayError(initSocket(&comSocket, argv[1]), 1);
+	displayError((connectSocket(&comSocket)), 1);
 
-	destroySocket(&comSocket);
-
-	send(serverFd, "Hello, world!", 13, 0);
+	send(comSocket.fd, "Hello, world!", 13, 0);
 
 	return 0;
 }
-
-//send(new_fd, "Hello, world!", 13, 0)
