@@ -62,6 +62,18 @@ int getUsers(FILE *file, int userCount, userAndPass *usersAndPasswords) {
 }
 
 
+int checkUser(int userCount, userAndPass *usersAndPasswords, const char *givenUser) {
+	for (int i = 0; i < userCount; i++) {
+		fprintf(stdout, ".%s. - .%s. - %d\n", usersAndPasswords[i].user, givenUser, strcmp(givenUser, usersAndPasswords[i].user));
+		if (strcmp(givenUser, usersAndPasswords[i].user) == 0)
+			return i;
+	}
+
+	return -1;
+	
+} 
+
+
 int main(int argc, char *argv[])
 {
 	socket_t comSocket;
@@ -80,6 +92,7 @@ int main(int argc, char *argv[])
 
 	int numbytes;
 	int userCount;
+	int userIndex;
 
 	//Create connection.
 	displayError(initSocket(&comSocket, NULL), 0);
@@ -96,14 +109,6 @@ int main(int argc, char *argv[])
 	getUsers(usersFile, userCount, usersAndPasswords);
 	fclose(usersFile);
 
-	FILE *fl = fopen("test.txt", "w");
-
-	for (int i = 0; i < userCount; i++) {
-		fprintf(fl, "%s", usersAndPasswords[i].user);
-	}
-
-	fclose(fl);
-
 	//Send connection message.
 	sendSocket(comTheirInfo.theirFd, MSG_220, strlen(MSG_220));
 
@@ -116,14 +121,31 @@ int main(int argc, char *argv[])
 
 		//Get FTP code from the client.
 		memcpy(recievedCode, recieveBuff, 4);
-		//Get the rest of the message.
-		strcpy(receivedMsg, &recieveBuff[4]);
+		//Get the rest of the message and remove the space.
+		strcpy(receivedMsg, &recieveBuff[5]);
+		//Remove the "\r\n" at the end of the message.
+		receivedMsg[strlen(receivedMsg) - 1] = '\0';
 
 		switch (dictLookup(recievedCode)) {
 			case USER_DICT:
-				makeResponse("331 Password required for", "\r\n", receivedMsg, sendBuff);
-				sendSocket(comTheirInfo.theirFd, sendBuff, MAX_BUFF_SIZE);
+				userIndex = checkUser(userCount, usersAndPasswords, receivedMsg);
+				
+				fprintf(stdout, "%d\n", userIndex);
+
+				//Check that the username actually exists.
+				if (userIndex != (-1)) {
+					makeResponse("331 Password required for ", "\r\n", receivedMsg, sendBuff);
+					sendSocket(comTheirInfo.theirFd, sendBuff, MAX_BUFF_SIZE);
+				}
+				else {
+					//Send username not found error.
+					sendSocket(comTheirInfo.theirFd, MSG_332, strlen(MSG_332));
+				}
+
 				break;
+
+			case PASS_DICT:
+
 		}
 
 		//Reset buffers each recv cycle to avoid errors.
@@ -132,7 +154,6 @@ int main(int argc, char *argv[])
 	}
 
 	destroyTheirSocket(&comTheirInfo);
-	free(usersAndPasswords);
 
 	return 0;
 }

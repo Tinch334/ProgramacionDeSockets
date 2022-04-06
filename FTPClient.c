@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 		numbytes = receiveSocket(comSocket.fd, recieveBuff, MAX_BUFF_SIZE);
 
 		//Print the recieved message.
-		fprintf(stdout, "%s\n", recieveBuff);
+		fprintf(stdout, "%s", recieveBuff);
 
 		//Get FTP code from the server and turn it into an integer.
 		memcpy(recievedCodeChar, recieveBuff, 3);
@@ -53,6 +53,10 @@ int main(int argc, char *argv[])
 				makeCommand("USER", "Username: ", sendBuff);
 				sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
 				break;
+
+			case 332:
+				makeCommand("USER", "Enter a valid username: ", sendBuff);
+				sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
 
 			case 331:
 				makeCommand("PASS", "Password: ", sendBuff);

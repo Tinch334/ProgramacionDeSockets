@@ -17,6 +17,8 @@
 
 //Message 220, salutte message
 #define MSG_220 "220 srvFTP version 1.0\r\n"
+//Message 322, need account.
+#define MSG_332 "332 Need account for login\r\n"
 //Message 331, password message
 #define MSG_331_1 "331 Password required for "
 #define MSG_331_2 "\r\n"
