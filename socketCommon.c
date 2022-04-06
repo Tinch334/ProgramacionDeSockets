@@ -46,6 +46,8 @@ int initSocket(socket_t *sock, const char *host) {
 
 		break;
 	}
+
+	return 0;
 }
 
 
