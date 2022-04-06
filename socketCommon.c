@@ -120,20 +120,38 @@ int sendSocket(int fd, const char *buffer, size_t bufSize) {
 }
 
 
-int receiveSocket(int fd, char *buffer, size_t bufSize) {
+/*int receiveSocket(int fd, char *buffer, size_t bufSize) {
 	int total = 0;
 	size_t received;
 
-	while (total < bufSize) {
-		received = recv(fd, &buffer[total], bufSize - total, 0);
+	while (total < (int)bufSize) {
+		printf("Inrecv total: %d\n", total);
 
-		if (received == 0) {
+		received = recv(fd, buffer, bufSize, 0);
+
+		fflush(stdout);
+		fprintf(stdout, "After recv %ld total: %d\n", received ,total);
+
+		if (received <= 0) {
 			buffer[total] = '\0';
+
+			fprintf(stdout, "Inreturn\n");
+
 			return total;
 		}
-		else
-			total += received;
+		else {
+			total += (int)received;
+
+			printf("Total: %d\n", total);
+		}
 	}
 
+	fprintf(stdout, "Inreturn outside\n");
 	return total;
+}*/
+
+//Temporary receive function.
+int receiveSocket(int fd, char *buffer, size_t bufSize) {
+	//This, &buffer[0], is used because we require a pointer to the start of the string.
+	return recv(fd, &buffer[0], bufSize, 0);
 }

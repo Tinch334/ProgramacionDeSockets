@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
 
 	while(1) {
 		numbytes = receiveSocket(comSocket.fd, recieveBuff, MAX_BUFF_SIZE);
+
 		//Print the recieved message.
 		fprintf(stdout, "%s\n", recieveBuff);
 
@@ -52,7 +53,16 @@ int main(int argc, char *argv[])
 				makeCommand("USER", "Username: ", sendBuff);
 				sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
 				break;
+
+			case 331:
+				makeCommand("PASS", "Password: ", sendBuff);
+				sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
+				break;
 		}
+
+		//Reset buffers each recv cycle to avoid errors.
+		memset(recieveBuff, 0, MAX_BUFF_SIZE);
+		memset(sendBuff, 0, MAX_BUFF_SIZE);
 		
 	}
 

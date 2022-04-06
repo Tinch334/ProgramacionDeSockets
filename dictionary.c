@@ -10,7 +10,7 @@
 //Number of keys.
 #define NKEYS (sizeof(DICT_MASTER_TABLE) / sizeof(dictStruct))
 
-int dictLookup(char *givenKey) {
+int dictLookup(const char *givenKey) {
     //Try to find an element in the dict with the same key.
     for (int i = 0; i < NKEYS; i++) {
         dictStruct elem = DICT_MASTER_TABLE[i];

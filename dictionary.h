@@ -34,7 +34,7 @@ static dictStruct DICT_MASTER_TABLE[] = {
 /*
     Looks the given key in the dict and returns the corresponding element.
 */
-int dictLookup(char *givenKey);
+int dictLookup(const char *givenKey);
 
 
 #endif /* __DICT_H__ */
