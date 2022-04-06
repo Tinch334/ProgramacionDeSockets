@@ -9,18 +9,54 @@
 #include "FTPClient.h"
 
 
+void makeCommand(const char *command, const char *displayMsg, char *finishedCommand) {
+	char inputBuffer[MAX_BUFF_SIZE];
+
+	fprintf(stdout, "%s", displayMsg);
+	fgets(inputBuffer, MAX_BUFF_SIZE, stdin);
+
+	//Add command code to start of command.
+	strcpy(finishedCommand, command);
+	//Add inputed string.
+	strcat(finishedCommand, " ");
+	strcat(finishedCommand, inputBuffer);
+}
+
+
 int main(int argc, char *argv[])
 {
 	socket_t comSocket;
 
-	char buff[MAX_BUFF_SIZE];
+	char recieveBuff[MAX_BUFF_SIZE];
+	char sendBuff[MAX_BUFF_SIZE];
+	char recievedCodeChar[4];
+
 	int serverFd;
 	int numbytes;
+	int recievedCode;
 
 	displayError(initSocket(&comSocket, argv[1]), 1);
 	displayError((connectSocket(&comSocket)), 1);
 
-	send(comSocket.fd, "Hello, world!", 13, 0);
+	while(1) {
+		numbytes = receiveSocket(comSocket.fd, recieveBuff, MAX_BUFF_SIZE);
+		//Print the recieved message.
+		fprintf(stdout, "%s\n", recieveBuff);
+
+		//Get FTP code from the server and turn it into an integer.
+		memcpy(recievedCodeChar, recieveBuff, 3);
+		recievedCode = atoi(recievedCodeChar);
+
+		switch (recievedCode) {
+			case 220:
+				makeCommand("USER", "Username: ", sendBuff);
+				sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
+				break;
+		}
+		
+	}
+
+	destroySocket(&comSocket);
 
 	return 0;
 }

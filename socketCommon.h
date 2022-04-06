@@ -14,6 +14,17 @@
 #define FTP_PORT_COM "21"
 #define MAX_BUFF_SIZE 500
 
+//Message 220, salutte message
+#define MSG_220 "220 srvFTP version 1.0\r\n"
+//Message 331, password message
+#define MSG_331_1 "331 Password required for "
+#define MSG_331_2 "\r\n"
+//Message 230, user message
+#define MSG_230_1 "230 User"
+#define MSG_230_2 "230 User logged in\r\n"
+//Message 530, login incorrect message
+#define MSG_530 "530 Login incorrect\r\n"
+
 
 typedef struct {
 	int fd;
