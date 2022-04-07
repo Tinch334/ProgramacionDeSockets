@@ -57,9 +57,15 @@ int main(int argc, char *argv[])
 			case 332:
 				makeCommand("USER", "Enter a valid username: ", sendBuff);
 				sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
+				break;
 
 			case 331:
 				makeCommand("PASS", "Password: ", sendBuff);
+				sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
+				break;
+
+			case 530:
+				makeCommand("PASS", "Enter the correct password: ", sendBuff);
 				sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
 				break;
 		}

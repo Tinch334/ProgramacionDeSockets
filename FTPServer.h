@@ -19,14 +19,27 @@ void makeResponse(const char *command_1, const char *command_2, const char *var,
 
 
 /*
-	Gets the number of lines in the given file.
+    Gets the number of lines in the given file.
 */
 int getLineNumber(FILE *file);
 
 
 /*
-	Gets the users and passwords from a file and stores them in the given struct.
+    Gets the users and passwords from the given file.
 */
 int getUsers(FILE *file, int userCount, userAndPass *usersAndPasswords);
+
+
+/*
+    Checks to see if the given user exists.
+*/
+int checkUser(int userCount, userAndPass *usersAndPasswords, const char *givenUser);
+
+
+/*
+	Checks to see if the given password matches the current user.
+*/
+int checkPassword(int userIndex, userAndPass *usersAndPasswords, const char *givenPassword);
+
 
 #endif /* __FTPS_H__ */

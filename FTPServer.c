@@ -64,7 +64,6 @@ int getUsers(FILE *file, int userCount, userAndPass *usersAndPasswords) {
 
 int checkUser(int userCount, userAndPass *usersAndPasswords, const char *givenUser) {
 	for (int i = 0; i < userCount; i++) {
-		fprintf(stdout, ".%s. - .%s. - %d\n", usersAndPasswords[i].user, givenUser, strcmp(givenUser, usersAndPasswords[i].user));
 		if (strcmp(givenUser, usersAndPasswords[i].user) == 0)
 			return i;
 	}
@@ -72,6 +71,15 @@ int checkUser(int userCount, userAndPass *usersAndPasswords, const char *givenUs
 	return -1;
 	
 } 
+
+
+int checkPassword(int userIndex, userAndPass *usersAndPasswords, const char *givenPassword) {
+	//Check if the given password is the same as the user's password.
+	if (strcmp(usersAndPasswords[userIndex].password, givenPassword) == 0)
+		return 1;
+	else
+		return (-1);
+}
 
 
 int main(int argc, char *argv[])
@@ -90,9 +98,21 @@ int main(int argc, char *argv[])
 	//The rest of what was sent by the user.
 	char receivedMsg[MAX_BUFF_SIZE];
 
+
 	int numbytes;
+
+	//Login variables.
 	int userCount;
 	int userIndex;
+	//Is 1 if the user is logged in, (-1) if not.
+	int userLogged = (-1);
+
+	//Get usernames and passwords.
+	usersFile = fopen(USERS_FILENAME, "r");
+	userCount = getLineNumber(usersFile);
+	userAndPass usersAndPasswords[userCount];
+	getUsers(usersFile, userCount, usersAndPasswords);
+	fclose(usersFile);
 
 	//Create connection.
 	displayError(initSocket(&comSocket, NULL), 0);
@@ -102,19 +122,11 @@ int main(int argc, char *argv[])
 
 	destroySocket(&comSocket);
 
-	//Get usernames and passwords.
-	usersFile = fopen(USERS_FILENAME, "r");
-	userCount = getLineNumber(usersFile);
-	userAndPass usersAndPasswords[userCount];
-	getUsers(usersFile, userCount, usersAndPasswords);
-	fclose(usersFile);
-
 	//Send connection message.
 	sendSocket(comTheirInfo.theirFd, MSG_220, strlen(MSG_220));
 
 	while(1) {
 		numbytes = receiveSocket(comTheirInfo.theirFd, recieveBuff, MAX_BUFF_SIZE);
-		//numbytes = recv(comTheirInfo.theirFd, recieveBuff, MAX_BUFF_SIZE, 0);
 		
 		//Print the received message.
 		fprintf(stdout, "%s\n", recieveBuff);		
@@ -129,12 +141,10 @@ int main(int argc, char *argv[])
 		switch (dictLookup(recievedCode)) {
 			case USER_DICT:
 				userIndex = checkUser(userCount, usersAndPasswords, receivedMsg);
-				
-				fprintf(stdout, "%d\n", userIndex);
 
 				//Check that the username actually exists.
 				if (userIndex != (-1)) {
-					makeResponse("331 Password required for ", "\r\n", receivedMsg, sendBuff);
+					makeResponse(MSG_331_1, MSG_331_2, receivedMsg, sendBuff);
 					sendSocket(comTheirInfo.theirFd, sendBuff, MAX_BUFF_SIZE);
 				}
 				else {
@@ -145,7 +155,16 @@ int main(int argc, char *argv[])
 				break;
 
 			case PASS_DICT:
+				userLogged = checkPassword(userIndex, usersAndPasswords, receivedMsg);
 
+				if (userLogged == 1) {
+					makeResponse(MSG_230_1, MSG_230_2, usersAndPasswords[userIndex].user, sendBuff);
+					sendSocket(comTheirInfo.theirFd, sendBuff, MAX_BUFF_SIZE);
+				}	
+				else {
+					//Send incorrect password error.
+					sendSocket(comTheirInfo.theirFd, MSG_530, strlen(MSG_530));
+				}
 		}
 
 		//Reset buffers each recv cycle to avoid errors.
