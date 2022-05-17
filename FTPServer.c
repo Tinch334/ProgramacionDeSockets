@@ -89,23 +89,30 @@ int main(int argc, char *argv[])
 
 	FILE *usersFile;
 
+	/*
+		Send and receive buffers.
+	*/
 	//The buffers for sending and receiving data.
 	char recieveBuff[MAX_BUFF_SIZE];
 	char sendBuff[MAX_BUFF_SIZE];
-
 	//The 4 letter code sent by the user.
 	char recievedCode[5];
 	//The rest of what was sent by the user.
 	char receivedMsg[MAX_BUFF_SIZE];
-
-
 	int numbytes;
 
-	//Login variables.
+	/*
+		Send and receive buffers.
+	*/
 	int userCount;
 	int userIndex;
 	//Is 1 if the user is logged in, (-1) if not.
 	int userLogged = (-1);
+
+	/*
+		Program variables.
+	*/
+	int programExit = 0;
 
 	//Get usernames and passwords.
 	usersFile = fopen(USERS_FILENAME, "r");
@@ -125,7 +132,7 @@ int main(int argc, char *argv[])
 	//Send connection message.
 	sendSocket(comTheirInfo.theirFd, MSG_220, strlen(MSG_220));
 
-	while(1) {
+	while(!programExit) {
 		numbytes = receiveSocket(comTheirInfo.theirFd, recieveBuff, MAX_BUFF_SIZE);
 		
 		//Print the received message.
@@ -165,13 +172,22 @@ int main(int argc, char *argv[])
 					//Send incorrect password error.
 					sendSocket(comTheirInfo.theirFd, MSG_530, strlen(MSG_530));
 				}
+
+				break;
+
+			case QUIT_DICT:
+				//Exit program while loop.
+				programExit = 1;
+
+				break;
 		}
 
-		//Reset buffers each recv cycle to avoid errors.
+		//Reset buffers each receive cycle to avoid errors.
 		memset(recieveBuff, 0, MAX_BUFF_SIZE);
 		memset(sendBuff, 0, MAX_BUFF_SIZE);
 	}
 
+	//Free the socket from the client.
 	destroyTheirSocket(&comTheirInfo);
 
 	return 0;
