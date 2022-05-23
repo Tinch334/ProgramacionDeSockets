@@ -84,8 +84,10 @@ int checkPassword(int userIndex, userAndPass *usersAndPasswords, const char *giv
 
 int main(int argc, char *argv[])
 {
+	//The socket pair used to send commands.
 	socket_t comSocket;
 	their_info comTheirInfo;
+	//The socket pair used to send files.
 
 	FILE *usersFile;
 
@@ -99,7 +101,6 @@ int main(int argc, char *argv[])
 	char recievedCode[5];
 	//The rest of what was sent by the user.
 	char receivedMsg[MAX_BUFF_SIZE];
-	int numbytes;
 
 	/*
 		Send and receive buffers.
@@ -121,19 +122,23 @@ int main(int argc, char *argv[])
 	getUsers(usersFile, userCount, usersAndPasswords);
 	fclose(usersFile);
 
-	//Create connection.
-	displayError(initSocket(&comSocket, NULL), 0);
+	//Create command connection.
+	displayError(initSocket(&comSocket, NULL, FTP_PORT_COM), 0);
 	displayError(bindSocket(&comSocket), 0);
 	displayError(listenSocket(&comSocket), 0);
 	displayError(acceptSocket(&comSocket, &comTheirInfo), 0);
 
 	destroySocket(&comSocket);
 
-	//Send connection message.
-	sendSocket(comTheirInfo.theirFd, MSG_220, strlen(MSG_220));
+	//Create data connection.
+
+	//Send connection message. As a side note, when using "strlen" on strings containing the "\r\n" combination add 1 to
+	//the given length. This is because said combination is interpreted as a linefeed, the ASCII character 10 and thus
+	//counted as only one char.
+	sendSocket(comTheirInfo.theirFd, MSG_220, msgstrlen(MSG_220));
 
 	while(!programExit) {
-		numbytes = receiveSocket(comTheirInfo.theirFd, recieveBuff, MAX_BUFF_SIZE);
+		receiveSocket(comTheirInfo.theirFd, recieveBuff, MAX_BUFF_SIZE);
 		
 		//Print the received message.
 		fprintf(stdout, "%s\n", recieveBuff);		
@@ -156,7 +161,7 @@ int main(int argc, char *argv[])
 				}
 				else {
 					//Send username not found error.
-					sendSocket(comTheirInfo.theirFd, MSG_332, strlen(MSG_332));
+					sendSocket(comTheirInfo.theirFd, MSG_332, msgstrlen(MSG_332));
 				}
 
 				break;
@@ -170,7 +175,7 @@ int main(int argc, char *argv[])
 				}	
 				else {
 					//Send incorrect password error.
-					sendSocket(comTheirInfo.theirFd, MSG_530, strlen(MSG_530));
+					sendSocket(comTheirInfo.theirFd, MSG_530, msgstrlen(MSG_530));
 				}
 
 				break;

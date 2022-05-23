@@ -16,6 +16,8 @@
 #define FTP_PORT_FILE "22"
 #define MAX_BUFF_SIZE 500
 
+#define msgstrlen(str) (strlen(str) + 1)
+
 //Message 220, salute message.
 #define MSG_220 "220 srvFTP version 1.0\r\n"
 //Message 322, need account.
@@ -31,74 +33,74 @@
 
 
 typedef struct {
-	int fd;
-	struct addrinfo *info;
+    int fd;
+    struct addrinfo *info;
 } socket_t;
 
 
 typedef struct {
-	struct sockaddr_storage theirAddr;
-	socklen_t theirSize;
-	int theirFd;
+    struct sockaddr_storage theirAddr;
+    socklen_t theirSize;
+    int theirFd;
 } their_info;
 
 
 /*
-	Initializes the socket with the given host.
+    Initializes the socket with the given host.
 */
-int initSocket(socket_t *socket, const char *host);
+int initSocket(socket_t *sock, const char *host, const char *port);
 
 
 /*
-	Binds the given socket.
+    Binds the given socket.
 */
 int bindSocket(socket_t *socket);
 
 
 /*
-	Listens on the given socket.
+    Listens on the given socket.
 */
 int listenSocket(socket_t *socket);
 
 
 /*
-	Tries to accept the given socket.
+    Tries to accept the given socket.
 */
 int acceptSocket(socket_t *socket, their_info *thInfo);
 
 
 /*
-	Connects the given socket.
+    Connects the given socket.
 */
 int connectSocket(socket_t *socket);
 
 
 /*
-	Destroys the given socket_t;
+    Destroys the given socket_t;
 */
 void destroySocket(socket_t *socket);
 
 
 /*
-	Destroys the given their_info;
+    Destroys the given their_info;
 */
 void destroyTheirSocket(their_info *sock);
 
 
 /*
-	Displays an error code properly, with it's accompanying message.
+    Displays an error code properly, with it's accompanying message.
 */
 void displayError(int errorCode, int type);
 
 
 /*
-	Sends the given buffer to the given socket_t.
+    Sends the given buffer to the given socket_t.
 */
 int sendSocket(int fd, const char *buffer, size_t bufSize);
 
 
 /*
-	Receives the info from the given socket_t.
+    Receives the info from the given socket_t.
 */
 int receiveSocket(int fd, char *buffer, size_t bufSize);
 

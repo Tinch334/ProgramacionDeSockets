@@ -13,7 +13,7 @@
 #include "socketCommon.h"
 
 
-int initSocket(socket_t *sock, const char *host) {
+int initSocket(socket_t *sock, const char *host, const char *port) {
 	struct addrinfo hints, *p;
 	int status;
 	//Used by "setsockopt" for configuration.
@@ -31,7 +31,7 @@ int initSocket(socket_t *sock, const char *host) {
     }
 
 	//Gets the info about our own host name.
-	if ((status = getaddrinfo(host, FTP_PORT_COM, &hints, &sock->info)) == (-1))
+	if ((status = getaddrinfo(host, port, &hints, &sock->info)) == (-1))
 		return status;
 
 	//Try to create socket.

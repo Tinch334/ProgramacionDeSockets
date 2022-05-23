@@ -7,13 +7,13 @@
 
 
 typedef struct {
-	char user[MAX_BUFF_SIZE];
-	char password[MAX_BUFF_SIZE];
+    char user[MAX_BUFF_SIZE];
+    char password[MAX_BUFF_SIZE];
 } userAndPass;
 
 
 /*
-	Creates a proper response for FTP requests by the user. Both commands are used for the first and second part of the command, like this: "command_1 <var> command_2".
+    Creates a proper response for FTP requests by the user. Both commands are used for the first and second part of the command, like this: "command_1 <var> command_2".
 */
 void makeResponse(const char *command_1, const char *command_2, const char *var, char *finishedResponse);
 
@@ -37,7 +37,7 @@ int checkUser(int userCount, userAndPass *usersAndPasswords, const char *givenUs
 
 
 /*
-	Checks to see if the given password matches the current user.
+    Checks to see if the given password matches the current user.
 */
 int checkPassword(int userIndex, userAndPass *usersAndPasswords, const char *givenPassword);
 
