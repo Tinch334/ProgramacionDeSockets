@@ -113,6 +113,15 @@ int main(int argc, char *argv[])
     int recievedCode;
     int programExit = 0;
 
+    /*
+        FTP console.
+    */
+    //This determines whether the console should be enabled, set to 1 after login.
+    int consoleActive = 0;
+    //Whether the console should repeat, in case the user enters an invalid FTP command.
+    int consoleLoop = 0;
+
+
     displayError(initSocket(&comSocket, argv[1], FTP_PORT_COM), 1);
     displayError((connectSocket(&comSocket)), 1);
 
@@ -149,38 +158,51 @@ int main(int argc, char *argv[])
 
             //We have logged in, we now enter the FTP prompt to send commands to the server.
             case 230:
-                while (!programExit) {
-                    //Get user operation.
-                    fprintf(stdout, "\nftp> ");
-                    fgets(operationInputBuff, MAX_BUFF_SIZE, stdin);
-                    //Removes trailing newline from fgets. We could use the simpler approach of
-                    //"str[strlen(str) - 1] = '\0'" however this would cause an error on an empty string.
-                    operationInputBuff[strcspn(operationInputBuff, "\n")] = 0;
-
-                    //Get actual command
-                    memcpy(operationBuff, operationInputBuff, 3);
-                    //Cut first 4 characters off the input to get the arguments to the command.
-                    memmove(operationInputBuff, operationInputBuff + 4, strlen(operationInputBuff));
-
-                    //Process command.
-                    if (strcmp(operationBuff, "get") == 0) {
-                        getFile(comSocket.fd, operationInputBuff);
-                    }
-
-                    else if (strcmp(operationBuff, "ext") == 0) {
-                        //Send quit message to server.
-                        makeCommandFromString("QUIT", "", sendBuff);
-                        sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
-
-                        //Exit both while loops.
-                        programExit = 1;
-                    }
-                    else {
-                        fprintf(stdout, "\nPlease enter a valid FTP command");
-                    }
-                }
+                consoleActive = 1;
 
                 break;
+        }
+
+        if (consoleActive) {
+            consoleLoop = 1;
+
+            while(consoleLoop) {
+                //Turn off console loop.
+                consoleLoop = 0;
+
+                //Get user operation.
+                fprintf(stdout, "\nftp> ");
+                fgets(operationInputBuff, MAX_BUFF_SIZE, stdin);
+                //Removes trailing newline from fgets. We could use the simpler approach of
+                //"str[strlen(str) - 1] = '\0'" however this would cause an error on an empty string.
+                operationInputBuff[strcspn(operationInputBuff, "\n")] = 0;
+
+                //Get actual command
+                memcpy(operationBuff, operationInputBuff, 3);
+                //Cut first 4 characters off the input to get the arguments to the command.
+                memmove(operationInputBuff, operationInputBuff + 4, strlen(operationInputBuff));
+
+                //Process command.
+                if (strcmp(operationBuff, "get") == 0) {
+                    getFile(comSocket.fd, operationInputBuff);
+                }
+
+                else if (strcmp(operationBuff, "ext") == 0) {
+                    //Send quit message to server.
+                    makeCommandFromString("QUIT", "", sendBuff);
+                    sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
+
+                    //Exit both while loops.
+                    programExit = 1;
+                }
+
+                else {
+                    fprintf(stdout, "\nPlease enter a valid FTP command\n");
+
+                    //The user entered an invalid command, repeat the console.
+                    consoleLoop = 1;
+                }    
+            }   
         }
 
         //Reset buffers each receive cycle to avoid errors.

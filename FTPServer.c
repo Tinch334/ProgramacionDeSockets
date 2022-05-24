@@ -215,6 +215,7 @@ int main(int argc, char *argv[])
 
             case PORT_DICT:
                 getPortCommandInfo(receivedMsg, portIP, &portPort);
+                sendSocket(comTheirInfo.theirFd, MSG_220, msgstrlen(MSG_220));
 
                 break;
 
