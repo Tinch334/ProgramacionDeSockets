@@ -45,7 +45,7 @@ void getSocketInfo(const int fd, char *ip, int *port) {
 }
 
 
-void getFile(const int fd, const char *filename) {
+void makePortCommand(const int fd) {
     //The port used for the command communication.
     int comPort;
     char comIP[MAX_BUFF_SIZE];
@@ -121,6 +121,11 @@ int main(int argc, char *argv[])
     //Whether the console should repeat, in case the user enters an invalid FTP command.
     int consoleLoop = 0;
 
+    /*
+        File exchange variables.
+    */
+    char filename[MAX_BUFF_SIZE];
+
 
     displayError(initSocket(&comSocket, argv[1], FTP_PORT_COM), 1);
     displayError((connectSocket(&comSocket)), 1);
@@ -156,10 +161,21 @@ int main(int argc, char *argv[])
                 sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
                 break;
 
-            //We have logged in, we now enter the FTP prompt to send commands to the server.
             case 230:
+                //We have logged in, we now enter the FTP prompt to send commands to the server.
                 consoleActive = 1;
+                break;
 
+            case 221:
+                //Exit receive loop.
+                programExit = 1;
+                //So we don't get stuck on the console asking for input.
+                consoleActive = 0;
+                break;
+
+            case 200:
+                makeCommandFromString("RETR", filename, sendBuff);
+                sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
                 break;
         }
 
@@ -184,16 +200,18 @@ int main(int argc, char *argv[])
 
                 //Process command.
                 if (strcmp(operationBuff, "get") == 0) {
-                    getFile(comSocket.fd, operationInputBuff);
+                    makePortCommand(comSocket.fd);
+
+                    //Copy get argument to filename.
+                    strcpy(filename, operationInputBuff);
                 }
 
                 else if (strcmp(operationBuff, "ext") == 0) {
                     //Send quit message to server.
                     makeCommandFromString("QUIT", "", sendBuff);
                     sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
-
-                    //Exit both while loops.
-                    programExit = 1;
+                    //Note: We don't actually exit the program when the user writes quit, we wait for the server to
+                    //reply with a 221 code to exit.
                 }
 
                 else {

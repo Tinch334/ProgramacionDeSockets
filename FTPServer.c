@@ -215,11 +215,13 @@ int main(int argc, char *argv[])
 
             case PORT_DICT:
                 getPortCommandInfo(receivedMsg, portIP, &portPort);
-                sendSocket(comTheirInfo.theirFd, MSG_220, msgstrlen(MSG_220));
+                sendSocket(comTheirInfo.theirFd, MSG_200, msgstrlen(MSG_200));
 
                 break;
 
 			case QUIT_DICT:
+                //Send goodbye message before closing server.
+                sendSocket(comTheirInfo.theirFd, MSG_221, msgstrlen(MSG_221));
 				//Exit program while loop.
 				programExit = 1;
 

@@ -20,6 +20,8 @@
 #define MSG_230_2 " logged in\r\n"
 //Message 530, login incorrect message.
 #define MSG_530 "530 Login incorrect\r\n"
+//Message 221, goodbye.
+#define MSG_221 "221 Goodbye\r\n"
 //Message 200, PORT command successful.
 #define MSG_200 "200 PORT command successful\r\n"
 
