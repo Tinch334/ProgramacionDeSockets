@@ -93,7 +93,7 @@ void destroyTheirSocket(their_info *sock) {
 
 
 //Set type to 0 for server, 1 for the client.
-void displayError(int errorCode, int type) {
+void displayError(const int errorCode, const int type) {
 	//Check that there's actually an error.
 	if (errorCode != 0)
 		fprintf(stderr, "There was a problem with the %s. Reason: %s\n", ((type == 0) ? "server" : "client"), gai_strerror(errorCode));
@@ -120,38 +120,22 @@ int sendSocket(int fd, const char *buffer, size_t bufSize) {
 }
 
 
-/*int receiveSocket(int fd, char *buffer, size_t bufSize) {
-	int total = 0;
-	size_t received;
-
-	while (total < (int)bufSize) {
-		printf("Inrecv total: %d\n", total);
-
-		received = recv(fd, buffer, bufSize, 0);
-
-		fflush(stdout);
-		fprintf(stdout, "After recv %ld total: %d\n", received ,total);
-
-		if (received <= 0) {
-			buffer[total] = '\0';
-
-			fprintf(stdout, "Inreturn\n");
-
-			return total;
-		}
-		else {
-			total += (int)received;
-
-			printf("Total: %d\n", total);
-		}
-	}
-
-	fprintf(stdout, "Inreturn outside\n");
-	return total;
-}*/
-
-//Temporary receive function.
-int receiveSocket(int fd, char *buffer, size_t bufSize) {
+int receiveSocket(const int fd, char *buffer, const size_t bufSize) {
 	//This, &buffer[0], is used because we require a pointer to the start of the string.
 	return recv(fd, &buffer[0], bufSize, 0);
+}
+
+
+their_info createConnection(const char *host, const char *port, const int type) {
+    socket_t connectionSocket;
+    their_info theirInfo;
+
+    displayError(initSocket(&connectionSocket, host, port), type);
+    displayError(bindSocket(&connectionSocket), type);
+    displayError(listenSocket(&connectionSocket), type);
+    displayError(acceptSocket(&connectionSocket, &theirInfo), type);
+
+    destroySocket(&connectionSocket);
+
+    return theirInfo;
 }

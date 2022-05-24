@@ -82,10 +82,41 @@ int checkPassword(int userIndex, userAndPass *usersAndPasswords, const char *giv
 }
 
 
+void getPortCommandInfo(char *msg, char *ip, int *port) {
+    char portIP[MAX_BUFF_SIZE] = "";
+    const char separator[2] = ",";
+    char *token;
+    int base, remainder;
+
+    //So we know when to process the IP and when the port.
+    int tokenCounter = 0;
+
+    //Converts the "," in the received message and turns them into "." for the IP address.
+    token = strtok(msg, separator);
+
+    while(token != NULL && tokenCounter < 4) {
+        strcat(portIP, token);
+        strcat(portIP, ".");
+
+        token = strtok(NULL, separator);
+        tokenCounter++;
+    }
+
+    //Removes the last dot added by the strcat.
+    portIP[strlen(portIP) - 1] = '\0';
+
+    //We use the token because it's assigned it's value on the last iteration of the while loop.
+    base = atoi(token);
+    remainder = atoi(strtok(NULL, separator));
+
+    //Convert the two camps for the port into an actual number.
+    *port = base * 256 + remainder;
+}
+
+
 int main(int argc, char *argv[])
 {
 	//The socket pair used to send commands.
-	socket_t comSocket;
 	their_info comTheirInfo;
 	//The socket pair used to send files.
 
@@ -115,6 +146,12 @@ int main(int argc, char *argv[])
 	*/
 	int programExit = 0;
 
+    /*
+        When the PORT command is used the IP and port received are stored in this variables.
+    */
+    char portIP[MAX_BUFF_SIZE];
+    int portPort;
+
 	//Get usernames and passwords.
 	usersFile = fopen(USERS_FILENAME, "r");
 	userCount = getLineNumber(usersFile);
@@ -123,12 +160,7 @@ int main(int argc, char *argv[])
 	fclose(usersFile);
 
 	//Create command connection.
-	displayError(initSocket(&comSocket, NULL, FTP_PORT_COM), 0);
-	displayError(bindSocket(&comSocket), 0);
-	displayError(listenSocket(&comSocket), 0);
-	displayError(acceptSocket(&comSocket, &comTheirInfo), 0);
-
-	destroySocket(&comSocket);
+	comTheirInfo = createConnection(NULL, FTP_PORT_COM, 0);
 
 	//Create data connection.
 
@@ -148,7 +180,8 @@ int main(int argc, char *argv[])
 		//Get the rest of the message and remove the space.
 		strcpy(receivedMsg, &recieveBuff[5]);
 		//Remove the "\r\n" at the end of the message.
-		receivedMsg[strlen(receivedMsg) - 1] = '\0';
+        receivedMsg[strcspn(receivedMsg, "\n")] = 0;
+
 
 		switch (dictLookup(recievedCode)) {
 			case USER_DICT:
@@ -179,6 +212,11 @@ int main(int argc, char *argv[])
 				}
 
 				break;
+
+            case PORT_DICT:
+                getPortCommandInfo(receivedMsg, portIP, &portPort);
+
+                break;
 
 			case QUIT_DICT:
 				//Exit program while loop.

@@ -90,7 +90,7 @@ void destroyTheirSocket(their_info *sock);
 /*
     Displays an error code properly, with it's accompanying message.
 */
-void displayError(int errorCode, int type);
+void displayError(const int errorCode, const int type);
 
 
 /*
@@ -102,7 +102,13 @@ int sendSocket(int fd, const char *buffer, size_t bufSize);
 /*
     Receives the info from the given socket_t.
 */
-int receiveSocket(int fd, char *buffer, size_t bufSize);
+int receiveSocket(const int fd, char *buffer, const size_t bufSize);
+
+
+/*
+    Creates a connection given a host and a port. Then listens and waits for someone to connect returns said connection.
+*/
+their_info createConnection(const char *host, const char *port, const int type);
 
 
 #endif /* __SC_H__ */

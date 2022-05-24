@@ -45,6 +45,49 @@ void getSocketInfo(const int fd, char *ip, int *port) {
 }
 
 
+void getFile(const int fd, const char *filename) {
+    //The port used for the command communication.
+    int comPort;
+    char comIP[MAX_BUFF_SIZE];
+
+    char sendBuff[MAX_BUFF_SIZE];
+    //Used to convert the port number to the required values for the PORT message.
+    char convertedPort[MAX_BUFF_SIZE];
+    //The arguments of the PORT message
+    char msgInfo[MAX_BUFF_SIZE] = "";
+    //Used by strtok to replace the "." with "," in the IP address.
+    const char separator[2] = ".";
+    char *token;
+
+    //Get info about the comm socket
+    getSocketInfo(fd, comIP, &comPort);
+
+    //Take all the . in the returned IP address and turn them into commas.
+    token = strtok(comIP, separator);
+
+    while(token != NULL) {
+        strcat(msgInfo, token);
+        strcat(msgInfo, ",");
+
+        token = strtok(NULL, separator);
+    }
+
+    //Convert port to required format. The way in which the port is send is by sending it in two one byte packages.
+    //The first byte contains the 
+    snprintf(convertedPort, MAX_BUFF_SIZE, "%d", (int)(comPort / 256));
+    strcat(msgInfo, convertedPort);
+
+    strcat(msgInfo, ",");
+
+    snprintf(convertedPort, MAX_BUFF_SIZE, "%d", (comPort % 256));
+    strcat(msgInfo, convertedPort);
+
+    //Make port command.
+    makeCommandFromString("PORT", msgInfo, sendBuff);
+    sendSocket(fd, sendBuff, MAX_BUFF_SIZE);
+}
+
+
 int main(int argc, char *argv[])
 {
     //Socket for command connection to the server.
@@ -53,9 +96,6 @@ int main(int argc, char *argv[])
     socket_t dataSocket;
     //Info when the server connects.
     their_info dataTheirInfo;
-    //The port used for the command communication.
-    int comPort;
-    char comIP[MAX_BUFF_SIZE];
 
     /*
         Send and receive buffers.
@@ -75,11 +115,6 @@ int main(int argc, char *argv[])
 
     displayError(initSocket(&comSocket, argv[1], FTP_PORT_COM), 1);
     displayError((connectSocket(&comSocket)), 1);
-
-    getSocketInfo(comSocket.fd, comIP, &comPort);
-
-    //For testing only. REMOVE WHEN DONE!!!!
-    fprintf(stderr, "Port: %d - IP: %s\n", comPort, comIP);
 
     while(!programExit) {
         receiveSocket(comSocket.fd, recieveBuff, MAX_BUFF_SIZE);
@@ -129,8 +164,7 @@ int main(int argc, char *argv[])
 
                     //Process command.
                     if (strcmp(operationBuff, "get") == 0) {
-                        makeCommandFromString("RETR", operationInputBuff, sendBuff);
-                        sendSocket(comSocket.fd, sendBuff, MAX_BUFF_SIZE);
+                        getFile(comSocket.fd, operationInputBuff);
                     }
 
                     else if (strcmp(operationBuff, "ext") == 0) {

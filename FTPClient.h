@@ -23,4 +23,10 @@ void makeCommand(const char *command, const char *displayMsg, char *finishedComm
 void getSocketInfo(const int fd, char *ip, int *port);
 
 
+/*
+    Handles all the steps in getting a file from the FTP server in active mode.
+*/
+void getFile(const int fd, const char *filename);
+
+
 #endif /* __FTPC_H__ */

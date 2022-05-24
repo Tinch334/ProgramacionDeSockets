@@ -41,5 +41,10 @@ int checkUser(int userCount, userAndPass *usersAndPasswords, const char *givenUs
 */
 int checkPassword(int userIndex, userAndPass *usersAndPasswords, const char *givenPassword);
 
+/*
+    Checks to see if the given password matches the current user.
+*/
+void getPortCommandInfo(char *msg, char *ip, int *port);
+
 
 #endif /* __FTPS_H__ */
